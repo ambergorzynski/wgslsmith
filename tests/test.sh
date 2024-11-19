@@ -2,11 +2,11 @@
 
 WGSLSMITH='../target/release/wgslsmith'
 
-$WGSLSMITH gen --recondition -o test.wgsl
+$WGSLSMITH gen --recondition -o testdata/test.wgsl
 
 LINE="$(head -n 1 test.wgsl)"
 INPUTS="${LINE:3}"
-echo $INPUTS > inputs.json
+echo $INPUTS > testdata/inputs.json
 
 $WGSLSMITH run test.wgsl inputs.json --config 'dawn:vk:7425'
 
