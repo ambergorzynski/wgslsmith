@@ -36,7 +36,7 @@ WGSLsmith is linked to a specific version of Dawn, which is contained in the sub
 $ ./build.py --dawn-path=/path/to/dawn
 ```
 
-The Dawn submodule uses the Chromium build system and depedency management, which is called `depot_tools`. This will automatically fetch and update external dependencies and toolchains with `gclient`. `gclient` auto-updates `depot_tools`. Sometimes this introduces problems if the updated dependencies are not backward-compatible with the Dawn version that WGSLsmith is attempting to link with.
+The Dawn submodule uses the Chromium build system and depedency management, `depot_tools`. This will fetch and update external dependencies and toolchains with `gclient`. `gclient` auto-updates `depot_tools`. Sometimes this introduces problems if the updated dependencies are not backward-compatible with the Dawn version that WGSLsmith is attempting to link with.
 
 By default, WGSLsmith disables the `depot_tools` auto-update. To enable the update, run the following:
 ```sh
