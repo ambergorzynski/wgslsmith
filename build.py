@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument("--no-reducer", action="store_true")
     parser.add_argument("--no-harness", action="store_true")
     parser.add_argument("--dawn-path", default="external/dawn")
+    parser.add_argument("--update-depot-tools", action="store_true")
     return parser.parse_args()
 
 
@@ -106,7 +107,10 @@ def gclient_sync():
     gclient_sync_hash = read_gclient_sync_hash()
     if gclient_sync_hash != dawn_commit:
         print("> dawn commit has changed, rerunning gclient sync")
-        subprocess.run(["gclient", "sync"], cwd=dawn_src_dir).check_returncode()
+        env = os.env.copy()
+        if not args.update_depot_tools:
+            env['DEPOT_TOOLS_UPDATE'] = "0"
+        subprocess.run(["gclient", "sync"], cwd=dawn_src_dir, env=env).check_returncode()
         write_gclient_sync_hash(dawn_commit)
 
 def dawn_gen_cmake():
