@@ -10,7 +10,7 @@ use futures::channel::oneshot;
 pub struct Instance(*mut c_void);
 
 pub struct AdapterInfo {
-    pub name: String,
+    pub name: WGPUStringView,
     pub backend: WGPUBackendType,
     pub device_id: u32,
 }
@@ -27,7 +27,7 @@ impl Instance {
                 .as_mut()
                 .unwrap()
                 .push(AdapterInfo {
-                    name: CStr::from_ptr((*info).device).to_str().unwrap().to_owned(),
+                    name: (*info).device,
                     backend: (*info).backendType,
                     device_id: (*info).deviceID,
                 });
