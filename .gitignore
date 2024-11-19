@@ -13,4 +13,5 @@ justfile
 
 /wgslsmith.toml
 
+/tests/testdata
 todo.md
