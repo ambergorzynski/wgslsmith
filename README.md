@@ -92,3 +92,24 @@ To use perses for reduction, grab and build it from https://github.com/wgslsmith
 [Insta](https://github.com/mitsuhiko/insta) is used for snapshot testing the parser.
 
 Install the tool with `cargo install cargo-insta` and use `cargo insta test -p parser` to run the parser tests.
+
+## Updating Dawn
+
+The Dawn submodule should be periodically updated, ideally whenever there is a new stable Chromium branch. The shallow clone of the submodule will not contain the branch information, so fetch this:
+```sh
+$ cd /path/to/wgslsmith
+$ cd external/dawn
+$ git remote set-branches origin '*'
+$ git fetch --depth=1
+$ git checkout chromium/${LATEST}
+```
+
+Where LATEST is the desired branch, e.g. 6846.
+
+Next, attempt to build WGSLsmith and update depot tools to get the required dependencies.
+```sh
+$ cd /path/to/wgslsmith
+$ ./build.py --update-depot-tools
+```
+
+The build may fail if the updated Dawn is not compatible with WGSLsmith. In this case, you will need to investigate the changes that have taken place since the previous linked Dawn and update WGSLsmith accordingly. Git bisect is a very useful tool for identifying the specific commit in which a breaking change was made, which can help to guide the update.
