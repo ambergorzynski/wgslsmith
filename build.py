@@ -107,7 +107,7 @@ def gclient_sync():
     gclient_sync_hash = read_gclient_sync_hash()
     if gclient_sync_hash != dawn_commit:
         print("> dawn commit has changed, rerunning gclient sync")
-        env = os.env.copy()
+        env = os.environ.copy()
         if not args.update_depot_tools:
             env['DEPOT_TOOLS_UPDATE'] = "0"
         subprocess.run(["gclient", "sync"], cwd=dawn_src_dir, env=env).check_returncode()
