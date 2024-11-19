@@ -25,17 +25,25 @@ $ cd wgslsmith
 $ git submodule update --init --depth=1
 ```
 
-To build everything, run the following:
+To build everything without options, run the following:
 ```sh
 $ ./build.py
 ```
 
-To link WGSLsmith to an external Dawn checkout:
+WGSLsmith is linked to a specific version of Dawn, which is contained in the submodule `external/Dawn`. It is possible to link WGSLsmith with a different Dawn checkout using the build option `--dawn-path`. 
+
 ```sh
 $ ./build.py --dawn-path=/path/to/dawn
 ```
 
-Alternatively, some of the tools can be used without any WebGPU implementations/compilers (e.g. generator and reconditioner). To compile these, run:
+The Dawn submodule uses the Chromium build system and depedency management, which is called `depot_tools`. This will automatically fetch and update external dependencies and toolchains with `gclient`. `gclient` auto-updates `depot_tools`. Sometimes this introduces problems if the updated dependencies are not backward-compatible with the Dawn version that WGSLsmith is attempting to link with.
+
+By default, WGSLsmith disables the `depot_tools` auto-update. To enable the update, run the following:
+```sh
+$ ./build.py --update-depot-tools
+```
+
+Some of the tools can be used without any WebGPU implementations/compilers (e.g. generator and reconditioner). To compile these, run:
 
 ```sh
 $ git clone --recursive https://github.com/wgslsmith/wgslsmith
