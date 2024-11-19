@@ -17,7 +17,23 @@ A more complete list of requirements is available [here](https://wgslsmith.githu
 
 ## Building
 
-The full set of tools requires compiling Dawn and wgpu. Full instructions can be found in the [docs](https://wgslsmith.github.io/building/index.html).
+This repository contains several submodules. These should be shallow-cloned as follows otherwise they will take a very long time.
+
+```sh
+$ git clone https://github.com/wgslsmith/wgslsmith
+$ cd wgslsmith
+$ git submodule update --init --depth=1
+```
+
+To build everything, run the following:
+```sh
+$ ./build.py
+```
+
+To link WGSLsmith to an external Dawn checkout:
+```sh
+$ ./build.py --dawn-path=/path/to/dawn
+```
 
 Alternatively, some of the tools can be used without any WebGPU implementations/compilers (e.g. generator and reconditioner). To compile these, run:
 
