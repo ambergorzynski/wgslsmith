@@ -113,3 +113,7 @@ $ ./build.py --update-depot-tools
 ```
 
 The build may fail if the updated Dawn is not compatible with WGSLsmith. In this case, you will need to investigate the changes that have taken place since the previous linked Dawn and update WGSLsmith accordingly. Git bisect is a very useful tool for identifying the specific commit in which a breaking change was made, which can help to guide the update.
+
+#### Common issues
+
+#TODO
