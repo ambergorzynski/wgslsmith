@@ -1,14 +1,16 @@
 #!/bin/bash
 
 WGSLSMITH='../target/release/wgslsmith'
+TESTFILE='./testdata/test.wgsl'
+INPUTFILE='./testdata/inputs.json'
 
-$WGSLSMITH gen --recondition -o testdata/test.wgsl
+$WGSLSMITH gen --recondition -o $TESTFILE
 
-LINE="$(head -n 1 test.wgsl)"
+LINE="$(head -n 1 $TESTFILE)"
 INPUTS="${LINE:3}"
-echo $INPUTS > testdata/inputs.json
+echo $INPUTS > $INPUTFILE
 
-$WGSLSMITH run test.wgsl inputs.json --config 'dawn:vk:7425'
+$WGSLSMITH run $TESTFILE $INPUTFILE --config 'dawn:vk:7425'
 
 RESULT=$?
 
