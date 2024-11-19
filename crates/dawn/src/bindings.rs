@@ -10,7 +10,7 @@ use futures::channel::oneshot;
 pub struct Instance(*mut c_void);
 
 pub struct AdapterInfo {
-    pub name: WGPUStringView,
+    pub name: String,
     pub backend: WGPUBackendType,
     pub device_id: u32,
 }
@@ -27,7 +27,7 @@ impl Instance {
                 .as_mut()
                 .unwrap()
                 .push(AdapterInfo {
-                    name: (*info).device,
+                    name: CStr::from_ptr((*info).device.data).to_str().unwrap().to_owned(),
                     backend: (*info).backendType,
                     device_id: (*info).deviceID,
                 });
@@ -538,18 +538,13 @@ impl<'a> ErrorScope<'a> {
 
         unsafe extern "C" fn callback(
             error_type: WGPUErrorType,
-            message: *const c_char,
+            message: WGPUStringView,
             userdata: *mut c_void,
         ) {
             let scope = (userdata as *mut ErrorScope).as_mut().unwrap();
 
             if error_type != WGPUErrorType_WGPUErrorType_Validation {
                 return;
-            }
-
-            if !message.is_null() {
-                let message = CStr::from_ptr(message).to_string_lossy();
-                eprintln!("{message}");
             }
 
             panic!("{}", scope.message);
@@ -571,13 +566,9 @@ impl<'a> ErrorScope<'a> {
 
 unsafe extern "C" fn default_error_callback(
     error_type: WGPUErrorType,
-    message: *const c_char,
+    message: WGPUStringView,
     _: *mut c_void,
 ) {
-    if !message.is_null() {
-        let message = CStr::from_ptr(message).to_string_lossy();
-        eprintln!("{message}");
-    }
 
     #[allow(non_upper_case_globals)]
     match error_type {
