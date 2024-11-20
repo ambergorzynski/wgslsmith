@@ -1,6 +1,5 @@
 use std::ffi::{c_void, CStr};
 use std::mem::zeroed;
-use std::os::raw::c_char;
 use std::ptr::{null, null_mut};
 
 use crate::dawn;
@@ -43,14 +42,11 @@ impl Instance {
     }
 
     pub fn create_device(self, backend: WGPUBackendType, device_id: u32) -> Option<Device> {
+
         let handle = unsafe { dawn::create_device(self.0, backend, device_id) };
 
         if handle.is_null() {
             panic!("failed to create dawn device");
-        }
-
-        unsafe {
-            wgpuDeviceSetUncapturedErrorCallback(handle, Some(default_error_callback), null_mut());
         }
 
         let device = Device {
@@ -565,9 +561,12 @@ impl<'a> ErrorScope<'a> {
 }
 
 unsafe extern "C" fn default_error_callback(
+    device: *const WGPUDevice,
     error_type: WGPUErrorType,
     message: WGPUStringView,
-    _: *mut c_void,
+    _ : *mut c_void,
+    _ : *mut c_void,
+
 ) {
 
     #[allow(non_upper_case_globals)]

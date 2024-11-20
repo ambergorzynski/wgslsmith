@@ -4,6 +4,7 @@
 #include <dawn/dawn_proc.h>
 #include <dawn/webgpu.h>
 #include <dawn/webgpu_cpp.h>
+#include <dawn/webgpu_cpp_print.h>
 #include <dawn/native/DawnNative.h>
 
 extern "C" dawn::native::Instance* new_instance() {
@@ -63,6 +64,16 @@ extern "C" WGPUDevice create_device(
 
     if (!selectedAdapter) return nullptr;
 
-    WGPUDeviceDescriptor descriptor = {};
+
+    wgpu::DeviceDescriptor descriptor = {};
+    
+    descriptor.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
+            if(type != wgpu::ErrorType::NoError);
+            std::cout << "Unexpected error: " << message;
+            exit(1);
+        }
+    );
+    
     return selectedAdapter->CreateDevice(&descriptor);
 }
