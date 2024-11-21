@@ -570,18 +570,21 @@ unsafe extern "C" fn default_error_callback(
 ) {
 
     #[allow(non_upper_case_globals)]
+
+    let msg = CStr::from_ptr(message.data).to_str().unwrap().to_owned();
+
     match error_type {
         WGPUErrorType_WGPUErrorType_Validation => {
-            panic!("validation error");
+            panic!("validation error: \n{}", msg);
         }
         WGPUErrorType_WGPUErrorType_OutOfMemory => {
-            panic!("out of memory");
+            panic!("out of memory: \n{}", msg);
         }
         WGPUErrorType_WGPUErrorType_DeviceLost => {
-            panic!("the dawn device was lost");
+            panic!("the dawn device was lost: \n{}", msg);
         }
         WGPUErrorType_WGPUErrorType_Unknown => {
-            panic!("an unknown error occurred");
+            panic!("an unknown error occurred: \n{}", msg);
         }
         _ => {}
     }
