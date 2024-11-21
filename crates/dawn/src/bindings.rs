@@ -43,7 +43,7 @@ impl Instance {
 
     pub fn create_device(self, backend: WGPUBackendType, device_id: u32) -> Option<Device> {
 
-        let handle = unsafe { dawn::create_device(self.0, backend, device_id) };
+        let handle = unsafe { dawn::create_device(self.0, Some(default_error_callback), backend, device_id) };
 
         if handle.is_null() {
             panic!("failed to create dawn device");

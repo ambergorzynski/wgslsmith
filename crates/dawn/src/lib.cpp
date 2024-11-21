@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <memory>
 
 #include <dawn/dawn_proc.h>
@@ -46,6 +47,7 @@ extern "C" void enumerate_adapters(
 
 extern "C" WGPUDevice create_device(
     const dawn::native::Instance* instance,
+    WGPUUncapturedErrorCallback callback,
     WGPUBackendType backendType,
     uint32_t deviceID
 ) {
@@ -64,16 +66,11 @@ extern "C" WGPUDevice create_device(
 
     if (!selectedAdapter) return nullptr;
 
+    WGPUUncapturedErrorCallbackInfo2 callbackInfo = {};
+    callbackInfo.callback = callback;
 
-    wgpu::DeviceDescriptor descriptor = {};
-    
-    descriptor.SetUncapturedErrorCallback(
-        [](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
-            if(type != wgpu::ErrorType::NoError);
-            std::cout << "Unexpected error: " << message;
-            exit(1);
-        }
-    );
+    WGPUDeviceDescriptor descriptor = {};
+    descriptor.uncapturedErrorCallbackInfo2 = callbackInfo;
     
     return selectedAdapter->CreateDevice(&descriptor);
 }

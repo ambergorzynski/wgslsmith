@@ -31,6 +31,7 @@ mod dawn {
 
         pub fn create_device(
             instance: *mut c_void,
+            callback: webgpu::WGPUUncapturedErrorCallback,
             backend_type: webgpu::WGPUBackendType,
             device_id: u32,
         ) -> webgpu::WGPUDevice;
