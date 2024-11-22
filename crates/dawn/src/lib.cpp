@@ -71,6 +71,11 @@ extern "C" WGPUDevice create_device(
 
     WGPUDeviceDescriptor descriptor = {};
     descriptor.uncapturedErrorCallbackInfo2 = callbackInfo;
+
+    wgpu::DeviceDescriptor desc = {};
+    desc.SetUncapturedErrorCallback(
+            [](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
+        });
     
-    return selectedAdapter->CreateDevice(&descriptor);
+    return selectedAdapter->CreateDevice(&desc);
 }

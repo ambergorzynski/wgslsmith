@@ -296,26 +296,36 @@ impl DeviceBuffer {
         unsafe {
             unsafe extern "C" fn map_callback(
                 res: WGPUBufferMapAsyncStatus,
-                userdata: *mut c_void,
+                message: WGPUStringView,
+                userdata1: *mut c_void,
+                userdata2: *mut c_void
             ) {
                 assert_eq!(
                     res,
                     WGPUBufferMapAsyncStatus_WGPUBufferMapAsyncStatus_Success
                 );
-                let mut tx = Box::from_raw(userdata as *mut Option<oneshot::Sender<()>>);
+                let mut tx = Box::from_raw(userdata1 as *mut Option<oneshot::Sender<()>>);
                 (*tx).take().unwrap().send(()).unwrap();
             }
 
+            // tx is sender, rx is reciever
             let (tx, rx) = oneshot::channel::<()>();
             let tx = Box::new(Some(tx));
 
-            wgpuBufferMapAsync(
+            let callbackInfo = WGPUBufferMapCallbackInfo2 {
+                nextInChain: null(),
+                mode: mode.bits as _,
+                callback: Some(map_callback),
+                userdata1: null_mut(),
+                userdata2: null_mut()
+            };
+
+            wgpuBufferMapAsync2(
                 self.handle,
                 mode.bits as _,
                 0,
                 size as _,
-                Some(map_callback),
-                Box::into_raw(tx) as _,
+                callbackInfo,
             );
 
             rx
@@ -575,7 +585,7 @@ unsafe extern "C" fn default_error_callback(
 
     match error_type {
         WGPUErrorType_WGPUErrorType_Validation => {
-            panic!("validation error: \n{}", msg);
+            panic!("validation error: \n{}, error type: {}", msg, error_type);
         }
         WGPUErrorType_WGPUErrorType_OutOfMemory => {
             panic!("out of memory: \n{}", msg);

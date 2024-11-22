@@ -59,7 +59,7 @@ pub async fn run(
 
     let queue = device.create_queue();
     let shader_module = device.create_shader_module(shader);
-    let pipeline = device.create_compute_pipeline(&shader_module, "main");
+    let pipeline = device.create_compute_pipeline(&shader_module, "main"); 
 
     let mut buffer_sets = vec![];
 
@@ -132,7 +132,7 @@ pub async fn run(
             },
         })
         .collect::<Vec<_>>();
-
+    
     let bind_group =
         device.create_bind_group(&pipeline.get_bind_group_layout(0), &bind_group_entries);
 
