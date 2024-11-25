@@ -35,5 +35,17 @@ mod dawn {
             backend_type: webgpu::WGPUBackendType,
             device_id: u32,
         ) -> webgpu::WGPUDevice;
+
+        pub fn map_async(
+            mode: webgpu::MapMode mode,
+            offset: size_t,
+            size: size_t,
+            callback: webgpu::WGPUBUfferMapCallback
+        ) -> webgpu::WGPUFuture;
+
+        pub fn wait_any(
+            instance: *mut c_void,
+            future: webgpu::WGPUFuture,
+        ) -> webgpu::WGPUWaitStatus;
     }
 }

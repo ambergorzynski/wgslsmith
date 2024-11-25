@@ -1,10 +1,12 @@
 use color_eyre::eyre::eyre;
 use dawn::webgpu::{
     WGPUBackendType_WGPUBackendType_D3D12, WGPUBackendType_WGPUBackendType_Metal,
-    WGPUBackendType_WGPUBackendType_Vulkan, WGPUBool,
+    WGPUBackendType_WGPUBackendType_Vulkan, WGPUBool
 };
 use dawn::*;
 use reflection::{PipelineDescription, ResourceKind};
+
+use std::fs;
 
 use crate::ConfigId;
 
@@ -158,22 +160,37 @@ pub async fn run(
     }
 
     let commands = encoder.finish();
-
     queue.submit(&commands);
 
     let mut results = vec![];
     for buffers in &buffer_sets {
         if let BufferSet::Storage { read, size, .. } = buffers {
-            let mut rx = read.map_async(DeviceBufferMapMode::READ, *size);
 
+            /*
+            let mut done : i32 = 0;
+            let mut rx = read.map_async(DeviceBufferMapMode::READ, *size, &mut done);
+            while (done == 0){
+                std::thread::sleep(std::time::Duration::from_millis(16));
+            }
+            /*
             while rx.try_recv().unwrap().is_none() {
                 device.tick();
                 std::thread::sleep(std::time::Duration::from_millis(16));
             }
+            */
+            */
+
+            let future : wgpu::Future = read.map_async(DeviceBufferMapMode::READ, *size);
+
+            //device._instance.wait_any(future);
+            
+            let data = "hellooo!";
+            let _ = fs::write("/data/dev/wgslsmith/outt.txt", data);
 
             let bytes = read.get_const_mapped_range(*size);
 
             results.push(bytes.to_vec());
+
         }
     }
 

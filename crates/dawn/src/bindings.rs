@@ -1,10 +1,12 @@
-use std::ffi::{c_void, CStr};
+use std::ffi::{c_void, c_int, CStr};
 use std::mem::zeroed;
 use std::ptr::{null, null_mut};
 
 use crate::dawn;
 use crate::webgpu::*;
 use futures::channel::oneshot;
+
+use std::fs;
 
 pub struct Instance(*mut c_void);
 
@@ -16,7 +18,7 @@ pub struct AdapterInfo {
 
 impl Instance {
     pub fn new() -> Instance {
-        Instance(unsafe { dawn::new_instance() })
+        Instance(unsafe { dawn::new_instance() }) 
     }
 
     pub fn enumerate_adapters(&self) -> Vec<AdapterInfo> {
@@ -56,6 +58,32 @@ impl Instance {
 
         Some(device)
     }
+
+    pub fn wait_any(&self, future: WGPUFuture) -> WGPUWaitStatus {
+        
+        unsafe {
+            dawn::wait_any(self.0, future)
+        }
+        
+        /*
+        let completed : bool = false;
+
+        let mut futureInfo = WGPUFutureWaitInfo{
+            future: future,
+            completed: completed as _,
+        };
+
+        unsafe {
+            wgpuInstanceWaitAny(self.0,
+                1 as _,
+                &mut futureInfo,
+                UINT16_MAX.into(),
+            )
+        }
+        */
+        
+    }
+ 
 }
 
 impl Default for Instance {
@@ -292,45 +320,50 @@ bitflags::bitflags! {
 }
 
 impl DeviceBuffer {
-    pub fn map_async(&self, mode: DeviceBufferMapMode, size: usize) -> oneshot::Receiver<()> {
+    pub fn map_async(&mut self, mode: DeviceBufferMapMode, size: usize) -> WGPUFuture {
         unsafe {
             unsafe extern "C" fn map_callback(
                 res: WGPUBufferMapAsyncStatus,
                 message: WGPUStringView,
                 userdata1: *mut c_void,
                 userdata2: *mut c_void
-            ) {
+            ) {        
                 assert_eq!(
                     res,
                     WGPUBufferMapAsyncStatus_WGPUBufferMapAsyncStatus_Success
                 );
-                let mut tx = Box::from_raw(userdata1 as *mut Option<oneshot::Sender<()>>);
-                (*tx).take().unwrap().send(()).unwrap();
             }
 
-            // tx is sender, rx is reciever
-            let (tx, rx) = oneshot::channel::<()>();
-            let tx = Box::new(Some(tx));
+            dawn::map_async(mode.bits as _,
+                0,
+                size as _,
+                WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly,
+                Some(map_callback),
+                null_mut())
 
+            /*
             let callbackInfo = WGPUBufferMapCallbackInfo2 {
                 nextInChain: null(),
-                mode: mode.bits as _,
+                mode: WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly, // callback mode
                 callback: Some(map_callback),
+                //userdata1: done as *mut c_void,
                 userdata1: null_mut(),
                 userdata2: null_mut()
             };
 
             wgpuBufferMapAsync2(
                 self.handle,
-                mode.bits as _,
+                mode.bits as _, // map mode
                 0,
                 size as _,
                 callbackInfo,
-            );
-
-            rx
+            )
+            */
+        
         }
     }
+
+
 
     pub fn get_mapped_range(&mut self, size: usize) -> &mut [u8] {
         unsafe {

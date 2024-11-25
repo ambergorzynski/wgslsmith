@@ -26,7 +26,7 @@ extern "C" dawn::native::Instance* new_instance() {
 
 extern "C" void delete_instance(dawn::native::Instance* instance) {
     delete instance;
-}
+} 
 
 extern "C" void enumerate_adapters(
     const dawn::native::Instance* instance,
@@ -43,6 +43,42 @@ extern "C" void enumerate_adapters(
         adapter.GetInfo(&info);
         callback(&info, userdata);
     }
+}
+
+extern "C" WGPUFuture map_async(
+    size_t offset,
+    size_t size,
+    WGPUBufferMapCallback callback
+) {
+
+    WGPUBufferMapCallbackInfo2 callbackInfo = WGPUBufferMapCallbackInfo2 {
+        mode: WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly, // callback mode
+        callback: callback
+    };
+
+    wgpu::Future future = MapAsync2(map_mode, offset, size, callbackInfo);
+}
+
+extern "C" WGPUWaitStatus wait_any(
+    const dawn::native::Instance* instance,
+    wgpu::Future future
+) {
+
+    /*
+    // create futureInfo struct
+    WGPUFutureWaitInfo futureInfo {};
+    futureInfo.future = future;
+    futureInfo.completed = false;
+    */
+
+    wgpu::Instance wgpuInstance(instance->Get());
+
+    //wgpu::FutureWaitInfo waitInfo = {future};
+
+    return wgpuInstance.WaitAny(
+        future,
+        UINT64_MAX);
+    
 }
 
 extern "C" WGPUDevice create_device(
