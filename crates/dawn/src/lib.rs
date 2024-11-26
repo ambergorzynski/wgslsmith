@@ -21,7 +21,7 @@ mod dawn {
     extern "C" {
         pub fn new_instance() -> *mut c_void;
 
-        pub fn delete_instance(instance: *mut c_void);
+        pub fn delete_instance(instance: *mut c_void); 
 
         pub fn enumerate_adapters(
             instance: *mut c_void,
@@ -36,16 +36,5 @@ mod dawn {
             device_id: u32,
         ) -> webgpu::WGPUDevice;
 
-        pub fn map_async(
-            mode: webgpu::MapMode mode,
-            offset: size_t,
-            size: size_t,
-            callback: webgpu::WGPUBUfferMapCallback
-        ) -> webgpu::WGPUFuture;
-
-        pub fn wait_any(
-            instance: *mut c_void,
-            future: webgpu::WGPUFuture,
-        ) -> webgpu::WGPUWaitStatus;
     }
 }

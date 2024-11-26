@@ -12,13 +12,19 @@ extern "C" dawn::native::Instance* new_instance() {
     // Initialize WebGPU proc table
     dawnProcSetProcs(&dawn::native::GetProcs());
 
-    auto instance = new dawn::native::Instance;
+    // Allow timed waits for asynchronous operations
+    wgpu::InstanceDescriptor desc = {};
+    desc.nextInChain = nullptr;
+    desc.features.timedWaitAnyEnable = true;
+
+    auto instance = new dawn::native::Instance(
+        reinterpret_cast<const WGPUInstanceDescriptor*> (&desc));
 
     // This makes things slow
     // instance->EnableBackendValidation(true);
     // instance->SetBackendValidationLevel(dawn::native::BackendValidationLevel::Full);
 
-    WGPURequestAdapterOptions options = {};
+    WGPURequestAdapterOptions options = {}; 
     instance->EnumerateAdapters(&options); 
 
     return instance;
@@ -43,42 +49,6 @@ extern "C" void enumerate_adapters(
         adapter.GetInfo(&info);
         callback(&info, userdata);
     }
-}
-
-extern "C" WGPUFuture map_async(
-    size_t offset,
-    size_t size,
-    WGPUBufferMapCallback callback
-) {
-
-    WGPUBufferMapCallbackInfo2 callbackInfo = WGPUBufferMapCallbackInfo2 {
-        mode: WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly, // callback mode
-        callback: callback
-    };
-
-    wgpu::Future future = MapAsync2(map_mode, offset, size, callbackInfo);
-}
-
-extern "C" WGPUWaitStatus wait_any(
-    const dawn::native::Instance* instance,
-    wgpu::Future future
-) {
-
-    /*
-    // create futureInfo struct
-    WGPUFutureWaitInfo futureInfo {};
-    futureInfo.future = future;
-    futureInfo.completed = false;
-    */
-
-    wgpu::Instance wgpuInstance(instance->Get());
-
-    //wgpu::FutureWaitInfo waitInfo = {future};
-
-    return wgpuInstance.WaitAny(
-        future,
-        UINT64_MAX);
-    
 }
 
 extern "C" WGPUDevice create_device(

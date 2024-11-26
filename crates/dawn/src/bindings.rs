@@ -16,7 +16,7 @@ pub struct AdapterInfo {
     pub device_id: u32,
 }
 
-impl Instance {
+impl Instance { 
     pub fn new() -> Instance {
         Instance(unsafe { dawn::new_instance() }) 
     }
@@ -52,37 +52,14 @@ impl Instance {
         }
 
         let device = Device {
-            _instance: self,
+            instance: self,
             handle,
         };
 
         Some(device)
     }
 
-    pub fn wait_any(&self, future: WGPUFuture) -> WGPUWaitStatus {
-        
-        unsafe {
-            dawn::wait_any(self.0, future)
-        }
-        
-        /*
-        let completed : bool = false;
 
-        let mut futureInfo = WGPUFutureWaitInfo{
-            future: future,
-            completed: completed as _,
-        };
-
-        unsafe {
-            wgpuInstanceWaitAny(self.0,
-                1 as _,
-                &mut futureInfo,
-                UINT16_MAX.into(),
-            )
-        }
-        */
-        
-    }
  
 }
 
@@ -101,7 +78,7 @@ impl Drop for Instance {
 }
 
 pub struct Device {
-    _instance: Instance,
+    instance: Instance,
     handle: *mut crate::webgpu::WGPUDeviceImpl,
 }
 
@@ -110,6 +87,27 @@ impl Device {
         DeviceQueue {
             handle: unsafe { wgpuDeviceGetQueue(self.handle).assert_not_null() },
         }
+    }
+        
+    pub fn wait_any(&self, future: WGPUFuture) -> WGPUWaitStatus {
+
+        let completed : bool = false;
+
+        let mut futureInfo = WGPUFutureWaitInfo{
+            future: future,
+            completed: completed as _,
+        };
+
+        unsafe {
+            let instance = wgpuAdapterGetInstance(wgpuDeviceGetAdapter(self.handle));
+
+            wgpuInstanceWaitAny(instance,
+                1 as _,
+                &mut futureInfo,
+                u64::MAX as _
+            )
+        }
+        
     }
 
     pub fn create_shader_module(&self, source: &str) -> ShaderModule {
@@ -333,20 +331,11 @@ impl DeviceBuffer {
                     WGPUBufferMapAsyncStatus_WGPUBufferMapAsyncStatus_Success
                 );
             }
-
-            dawn::map_async(mode.bits as _,
-                0,
-                size as _,
-                WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly,
-                Some(map_callback),
-                null_mut())
-
-            /*
+            
             let callbackInfo = WGPUBufferMapCallbackInfo2 {
                 nextInChain: null(),
                 mode: WGPUCallbackMode_WGPUCallbackMode_WaitAnyOnly, // callback mode
                 callback: Some(map_callback),
-                //userdata1: done as *mut c_void,
                 userdata1: null_mut(),
                 userdata2: null_mut()
             };
@@ -358,12 +347,8 @@ impl DeviceBuffer {
                 size as _,
                 callbackInfo,
             )
-            */
-        
         }
     }
-
-
 
     pub fn get_mapped_range(&mut self, size: usize) -> &mut [u8] {
         unsafe {

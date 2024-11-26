@@ -163,29 +163,14 @@ pub async fn run(
     queue.submit(&commands);
 
     let mut results = vec![];
-    for buffers in &buffer_sets {
+    for buffers in &mut buffer_sets {
         if let BufferSet::Storage { read, size, .. } = buffers {
 
-            /*
-            let mut done : i32 = 0;
-            let mut rx = read.map_async(DeviceBufferMapMode::READ, *size, &mut done);
-            while (done == 0){
-                std::thread::sleep(std::time::Duration::from_millis(16));
-            }
-            /*
-            while rx.try_recv().unwrap().is_none() {
-                device.tick();
-                std::thread::sleep(std::time::Duration::from_millis(16));
-            }
-            */
-            */
+            let future = read.map_async(DeviceBufferMapMode::READ, *size);
 
-            let future : wgpu::Future = read.map_async(DeviceBufferMapMode::READ, *size);
+            let wait_status = device.wait_any(future);
 
-            //device._instance.wait_any(future);
-            
-            let data = "hellooo!";
-            let _ = fs::write("/data/dev/wgslsmith/outt.txt", data);
+            //panic!("wait status is {}", wait_status); // 1 is success, 3 is unsupported timeout
 
             let bytes = read.get_const_mapped_range(*size);
 
